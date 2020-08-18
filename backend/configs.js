@@ -51,7 +51,8 @@ const configEnv = {
     // Default value is not set, which only validate the client side captcha
     captchaKey: '',
     // Mongo main database
-    mongoUrl: `mongodb://localhost:27017,localhost:27018,localhost:27019/flexiwan?replicaSet=rs`,
+    //mongoUrl: `mongodb://localhost:27017,localhost:27018,localhost:27019/flexiwan?replicaSet=rs`,
+    mongoUrl: `mongodb://localhost:27017/flexiwan?replicaSet=rs`,
     // Mongo analytics database
     mongoAnalyticsUrl: `mongodb://localhost:27017,localhost:27018,localhost:27019/flexiwanAnalytics?replicaSet=rs`,
     // Mongo Billing database

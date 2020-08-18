@@ -353,13 +353,13 @@ class ExpressServer {
       this.server.on('error', this.onError(this.port));
       this.server.on('listening', this.onListening(this.server));
 
-      /*
+      
       this.secureServer.listen(this.securePort, () => {
         console.log('HTTPS server listening on port', { params: { port: this.securePort } });
       });
       this.secureServer.on('error', this.onError(this.securePort));
       this.secureServer.on('listening', this.onListening(this.secureServer));
-      */
+      
     } catch (error) {
       console.log("\n\n\n mojtaba \n\n\n")
 
