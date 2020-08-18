@@ -121,6 +121,8 @@ class UsersService {
     try {
       // Validate password
       if (!auth.validatePassword(updatePasswordRequest.password)) {
+
+        console.log(` ---------- 403 ------------`)
         return Service.rejectResponse('Bad Password', 403);
       }
 

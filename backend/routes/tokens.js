@@ -28,10 +28,13 @@ tokensRouter.use(bodyParser.json());
 const formatErr = (err, msg) => {
   // Check for unique error
   if (err.name === 'MongoError' && err.code === 11000) {
+    console.log(`\n\n\n at tokens.js, 1 \n\n\n`)
     return ({ status: 500, error: 'Token ' + msg.name + ' already exists' });
   } else if (err.message) {
+    console.log(`\n\n\n at tokens.js, 2 \n\n\n`)
     return ({ status: 500, error: err.message });
   } else {
+    console.log(`\n\n\n at tokens.js, 3 \n\n\n`)
     return ({ status: 500, error: 'Unable to format error' });
   }
 };

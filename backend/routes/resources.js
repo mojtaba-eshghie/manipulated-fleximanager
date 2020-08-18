@@ -34,11 +34,14 @@ const formatErr = (err, msg) => {
   if (err.name === 'MongoError' && err.code === 11000) {
     if (err.errmsg.includes('downloadObject')) {
       // Check if object ID is not unique
+      console.log(`\n\n\n ----> 500 at resources.js, 1 \n\n\n`)
       return ({ status: 500, error: 'Resource for this object already exist' });
     } else {
+      console.log(`\n\n\n ----> 500 at resources.js, 2 \n\n\n`)
       return ({ status: 500, error: 'Error getting file link, please try again' });
     }
   } else {
+    console.log(`\n\n\n ----> 500 at resources.js, 3 \n\n\n`)
     return ({ status: 500, error: 'Generate resource link error' });
   }
 };

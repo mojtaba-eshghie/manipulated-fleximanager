@@ -53,10 +53,13 @@ devicesRouter.use(bodyParser.json());
 const formatErr = (err, msg) => {
   // Check for unique error
   if (err.name === 'MongoError' && err.code === 11000) {
+    console.log(`\n\n\n ----> at devices.js, 1 \n\n\n`)
     return ({ status: 500, error: 'Device ' + msg.name + ' already exists' });
   } else if (err.message) {
+    console.log(`\n\n\n at devices.js, 2 \n\n\n`)
     return ({ status: 500, error: err.message });
   } else {
+    console.log(`\n\n\n at devices.js, 3 \n\n\n`)
     return ({ status: 500, error: 'Unable to format error' });
   }
 };
@@ -327,6 +330,7 @@ devicesRouter.route('/apply')
       }, (err) => { next(err); })
       .catch((err) => {
         logger.warn('Apply operation failed', { params: { err: err.message }, req: req });
+        console.log(`\n\n\n at devices.js, 4 \n\n\n`)
         return next(createError(500, 'Device Sync'));
       });
   });
@@ -365,6 +369,7 @@ devicesRouter.route('/:deviceId/apply')
           await dispatcher.apply(device, req.body.method, req.user, req.body);
           return res.status(200).send({});
         } else {
+          console.log(`\n\n\n at devices.js, 5 \n\n\n`)
           return next(createError(500, 'Device error'));
         }
       },
@@ -376,6 +381,7 @@ devicesRouter.route('/:deviceId/apply')
           params: { err: err.message },
           req: req
         });
+        console.log(`\n\n\n at devices.js, 6 \n\n\n`)
         return next(createError(500, 'Apply device'));
       });
   });
@@ -408,6 +414,7 @@ devicesRouter.route('/:deviceId/configuration')
           },
           req: req
         });
+        console.log(`\n\n\n at devices.js, 7 \n\n\n`)
         return next(createError(500, 'Failed to get device configuration'));
       }
 
@@ -416,6 +423,7 @@ devicesRouter.route('/:deviceId/configuration')
         configuration: deviceConf.message
       });
     } catch (err) {
+      console.log(`\n\n\n at devices.js, 8 \n\n\n`)
       return next(createError(500));
     }
   });
@@ -471,6 +479,7 @@ devicesRouter.route('/:deviceId/logs')
             },
             req: req
           });
+          console.log(`\n\n\n at devices.js, 9 \n\n\n`)
           return next(createError(500, 'Failed to get device logs'));
         }
 
@@ -479,6 +488,7 @@ devicesRouter.route('/:deviceId/logs')
           logs: deviceLogs.message
         });
       } catch (err) {
+        console.log(`\n\n\n at devices.js, 10 \n\n\n`)
         return next(createError(500));
       }
     });
@@ -513,6 +523,7 @@ devicesRouter.route('/:deviceId/routes')
           },
           req: req
         });
+        console.log(`\n\n\n at devices.js, 11 \n\n\n`)
         return next(createError(500, 'Failed to get device routes'));
       }
       const response = {
@@ -522,6 +533,7 @@ devicesRouter.route('/:deviceId/routes')
       };
       return res.status(200).send(response);
     } catch (err) {
+      console.log(`\n\n\n at devices.js, 12 \n\n\n`)
       return next(createError(500));
     }
   });
@@ -554,6 +566,7 @@ devicesRouter.route('/:deviceId/staticroutes')
 
       return res.status(200).send(routes);
     } catch (err) {
+      console.log(`\n\n\n at devices.js, 13 \n\n\n`)
       return next(createError(500));
     }
   })
@@ -592,6 +605,7 @@ devicesRouter.route('/:deviceId/staticroutes')
       await dispatcher.apply(device, req.body.method, req.user, req.body);
       return res.status(200).send({});
     } catch (error) {
+      console.log(`\n\n\n at devices.js, 14 \n\n\n`)
       return next(createError(500, 'Failed to add a route'));
     }
   });

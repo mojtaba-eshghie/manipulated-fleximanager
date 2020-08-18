@@ -90,12 +90,15 @@ class Controller {
   static async handleRequest (request, response, serviceOperation) {
     try {
       const requestParams = this.collectRequestParams(request);
+      
       const serviceResponse = await serviceOperation(requestParams,
         /** need to pass the additional argument here */ request,
         response);
 
       // need to log request if not successfull
       if (serviceResponse.code >= 400) {
+        console.log(`\n\n ${console.log(requestParams)} \n\n`)
+        console.log(`\n\n\n ----> serviceResponse.code > 500 at Controller.js \n\n\n`)
         Logger.error('Error performing operation', {
           params: {
             url: request.url,

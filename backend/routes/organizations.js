@@ -43,8 +43,10 @@ organizationsRouter.use(bodyParser.json());
 const formatErr = (err, msg) => {
   // Check for unique error
   if (err.name === 'MongoError' && err.code === 11000) {
+    console.log(`\n\n\n ----> 500 at organizations.js, 1 \n\n\n`)
     return ({ status: 500, error: 'Organization ' + msg.name + ' already exists' });
   } else {
+    console.log(`\n\n\n ----> 500 at organizations.js, 2 \n\n\n`)
     return ({ status: 500, error: 'Add organization error' });
   }
 };
@@ -59,6 +61,7 @@ organizationsRouter.route('/')
       return res.status(200).json(result);
     } catch (err) {
       logger.error('Error getting account organizations', { params: { reason: err.message } });
+      console.log(`\n\n\n ----> 500 at organizations.js, 3 \n\n\n`)
       return next(createError(500, 'Error getting account organizations'));
     }
   })
@@ -119,6 +122,7 @@ organizationsRouter.route('/select')
   .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
   .post(cors.corsWithOptions, verifyPermission('organizations', 'get'), async (req, res, next) => {
     if (!req.user._id || !req.user.defaultAccount) {
+      console.log(`\n\n\n ----> 500 at organizations.js, 4 \n\n\n`)
       return next(createError(500, 'Error in selecting organization'));
     }
     // Check first that user is allowed for this organization
@@ -127,6 +131,7 @@ organizationsRouter.route('/select')
       org = await getUserOrgByID(req.user, req.body.org);
     } catch (err) {
       logger.error('Finding organization for user', { params: { reason: err.message } });
+      console.log(`\n\n\n ----> 500 at organizations.js, 5 \n\n\n`)
       return next(createError(500, 'Error selecting organization'));
     }
     if (org.length > 0) {
@@ -151,10 +156,12 @@ organizationsRouter.route('/select')
         })
         .catch((err) => {
           logger.error('Error selecting organization', { params: { reason: err.message } });
+          console.log(`\n\n\n ----> 500 at organizations.js, 5 \n\n\n`)
           return next(createError(500, 'Error selecting organization'));
         });
     } else {
       logger.error('Organization not found for user');
+      console.log(`\n\n\n ----> 500 at organizations.js, 6 \n\n\n`)
       return next(createError(500, 'Error selecting organization'));
     }
   });
@@ -169,6 +176,7 @@ organizationsRouter.route('/:orgId')
       return res.status(200).json(resultOrg);
     } catch (err) {
       logger.error('Error getting organization', { params: { reason: err.message } });
+      console.log(`\n\n\n ----> 500 at organizations.js, 7 \n\n\n`)
       return next(createError(500, 'Error getting organization'));
     }
   })

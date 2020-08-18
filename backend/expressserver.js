@@ -88,6 +88,7 @@ class ExpressServer {
   }
 
   setupMiddleware () {
+    
     // this.setupAllowedMedia();
     this.app.use((req, res, next) => {
       console.log(`${req.method}: ${req.url}`);
@@ -260,6 +261,7 @@ class ExpressServer {
     // Set log severity on the request to log errors only for 5xx status codes.
     this.app.use((err, req, res, next) => {
       req.logSeverity = err.status || 500;
+      console.log(`\n\n\n ----> at expressserver.js 1 \n\n\n`);
       next(err);
     });
     this.app.use(errLogger);
@@ -272,6 +274,7 @@ class ExpressServer {
     this.app.use((error, req, res, next) => {
       const errorResponse = error.error || error.message || error.errors || 'Unknown error';
       res.status(error.status || 500);
+      console.log(`\n\n\n ----> at expressserver.js 2 \n\n\n`);
       res.type('json');
       res.json({ error: errorResponse });
     });
@@ -361,7 +364,7 @@ class ExpressServer {
       this.secureServer.on('listening', this.onListening(this.secureServer));
       
     } catch (error) {
-      console.log("\n\n\n mojtaba \n\n\n")
+      
 
       console.log('Express server lunch error', { params: { message: error.message } });
     }

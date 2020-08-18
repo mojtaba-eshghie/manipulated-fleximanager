@@ -53,8 +53,10 @@ const pick = (...keys) => obj => keys.reduce((a, e) => {
 const formatErr = (err, msg) => {
   // Check for unique error
   if (err.name === 'MongoError' && err.code === 11000) {
+    console.log(`\n\n\n ----> 500 at members.js, 1 \n\n\n`)
     return ({ status: 500, error: 'User ' + msg.email + ' already exists' });
   } else {
+    console.log(`\n\n\n ----> 500 at members.js, 2 \n\n\n`)
     return ({ status: 500, error: 'User invitation error' });
   }
 };
@@ -195,6 +197,7 @@ membersRouter.route('/')
         })
         .catch((err) => {
           logger.error('Error getting members', { params: { reason: err.message } });
+          console.log(`\n\n\n ----> 500 at members.js, 3 \n\n\n`)
           return next(createError(500, 'Error getting members'));
         });
     } else {
@@ -210,6 +213,7 @@ membersRouter.route('/')
 
     // Check if user don't add itself
     if (req.user.email === req.body.email) {
+      console.log(`\n\n\n ----> 500 at members.js, 4 \n\n\n`)
       return next(createError(500, 'You can not add yourself'));
     }
 
@@ -399,6 +403,7 @@ membersRouter.route('/options/:optionsType')
       })
       .catch((err) => {
         logger.error('Error getting member options', { params: { reason: err.message } });
+        console.log(`\n\n\n ----> 500 at members.js, 5 \n\n\n`)
         return next(createError(500, 'Error getting member options'));
       });
   });
@@ -456,6 +461,7 @@ membersRouter.route('/:memberId')
         })
         .catch((err) => {
           logger.error('Error getting member', { params: { reason: err.message } });
+          console.log(`\n\n\n ----> 500 at members.js, 6 \n\n\n`)
           return next(createError(500, 'Error getting member'));
         });
     } else {
@@ -505,6 +511,7 @@ membersRouter.route('/:memberId')
       return res.status(200).json({ ok: 1 });
     } catch (err) {
       logger.error('Error deleting member', { params: { reason: err.message } });
+      console.log(`\n\n\n ----> 500 at members.js, 7 \n\n\n`)
       return next(createError(500, 'Error deleting member'));
     };
   })

@@ -45,6 +45,7 @@ const formatErr = (err, msg) => {
   } else if (err.message) {
     return ({ status: 408, error: err.message });
   } else {
+    console.log(`\n\n\n ----> 500 at connect.js, 1 \n\n\n`)
     return ({ status: 500, error: 'Unable to format error' });
   }
 };
@@ -216,6 +217,7 @@ connectRouter.route('/register')
             } else if (resp.length === 0) {
               return next(createError(404, 'Token not found'));
             } else {
+              console.log(`\n\n\n ----> 500 at connect.js, 2 \n\n\n`)
               return next(
                 createError(
                   500,

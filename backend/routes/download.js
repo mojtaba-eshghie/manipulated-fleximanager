@@ -28,6 +28,7 @@ const downloadRouter = express.Router();
 downloadRouter.use(bodyParser.json());
 
 const formatErr = (err, msg) => {
+  console.log(`\n\n\n ----> 500 at download.js, 1 \n\n\n`)
   return ({ status: 500, error: 'Download error' });
 };
 

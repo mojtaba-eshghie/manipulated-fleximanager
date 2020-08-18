@@ -45,10 +45,13 @@ router.use(bodyParser.json());
 const formatErr = (err, msg) => {
   // Check for unique error
   if (err.name === 'MongoError' && err.code === 11000) {
+    console.log(`\n\n\n ----> 500 at users.js, 1 \n\n\n`)
     return ({ status: 500, error: 'User ' + msg.email + ' already exists' });
   } else if (err.name === 'ValidationError') {
+    console.log(`\n\n\n ----> 500 at users.js, 2 \n\n\n`)
     return ({ status: 500, error: err.message.split(':')[2] });
   } else {
+    console.log(`\n\n\n ----> 500 at users.js, 3 \n\n\n`)
     return ({ status: 500, error: err.message });
   }
 };
@@ -80,6 +83,8 @@ router.route('/register')
     });
 
     // Validate password
+    console.log(`\n\n\n -------------- ${JSON.stringify(req.body)} -------------- \n\n\n`);
+
     if (!auth.validatePassword(req.body.password)) return next(createError(500, 'Bad Password'));
 
     // Verify captcha
@@ -384,7 +389,10 @@ const updatePassword = (req, res, next) => {
   }
 
   // Validate password
+  console.log(`\n\n\n -------------- ${req.body.password} -------------- \n\n\n`);
+
   if (!auth.validatePassword(req.body.password)) return next(createError(500, 'Bad Password'));
+
 
   let registerUser = null;
   User.findOneAndUpdate(
