@@ -121,7 +121,7 @@ const configEnv = {
     // Bypass mailer certificate validation
     mailerBypassCert: false,
     // From address used when sending emails
-    mailerFromAddress: 'o.zeynalpour@gmail.com',
+    mailerFromAddress: 'eshghi.it@gmail.com',
     // Name of the company, is used in email templates
     companyName: 'flexiWAN',
     // Software version query link
