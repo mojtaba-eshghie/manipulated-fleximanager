@@ -119,7 +119,7 @@ const configEnv = {
     // Port of SMTP server
     mailerPort: 25,
     // Bypass mailer certificate validation
-    mailerBypassCert: false,
+    mailerBypassCert: true,
     // From address used when sending emails
     mailerFromAddress: 'eshghi.it@gmail.com',
     // Name of the company, is used in email templates
