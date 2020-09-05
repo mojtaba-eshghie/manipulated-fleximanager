@@ -1,88 +1,189 @@
-# About flexiWAN
+/etc/flexiwan/agent/token.txt
 
-flexiWAN is the world's first open source [SD-WAN](https://flexiwan.com/). flexiWAN offers a complete SD-WAN solution comprising of flexiEdge (the edge router) and flexiManage (the central management system) with core SD-WAN functionality. Our mission is to democratize the SD-WAN Market through an open source & modular  SD-WAN solution lowering barriers to entry for companies to adopt it or offer services based on the flexiWAN SD-WAN solution. To learn more about the flexiWAN's unique approach to networking, visit the [flexiWAN](https://flexiwan.com/) website, and follow the company on [Twitter](https://twitter.com/FlexiWan) and [LinkedIn](https://www.linkedin.com/company/flexiwan).
 
-To contact us please drop us an email at yourfriends@flexiwan.com, or for any general issue please use our [Google User Group](https://groups.google.com/a/flexiwan.com/forum/#!forum/flexiwan-users)
+sudo systemctl status flexiwan-router
+sudo systemctl restart flexiwan-router
+sudo systemctl start flexiwan-router
 
-# flexiManage
+sudo fwagent start
 
-This repository contains the flexiManage backend component from flexiWAN. flexiManage service is used for managing [flexiEdge devices](https://docs.flexiwan.com/overview/arch.html#flexiedge). It allows users to create users and accounts and manage the entire network inventory of the organizations in the account.
 
-Our hosted service https://manage.flexiwan.com provides a free UI access to the flexiManage service where users can create an account and use up to 3 flexiEdge devices for free.
 
-## What is included in this repository
+docker run -d --name new-vpp new-vpp
+docker exec new-vpp vppctl show version
+docker exec -it new-vpp bash
 
-The flexiManage backend component provides REST API for managing the flexiWAN network, configuring and connecting to the flexiWAN flexiEdge devices. 
-The repository includes two git submodules which are used by the flexiWAN SaaS service and are not open. 
 
-When pulling the flexiManage repository, 
-these submodules would be seen as an empty directory:
-* client - a git submodule for the flexiWAN SaaS UI. The UI provides the user side logic and design for managing the network. It uses REST to access flexiManage
-* backend/billing - a git submodule for managing the flexiWAN SaaS billing
+docker rmi -f image_id
+docker rmi -f testvppscenario_router_a testvppscenario_router_b
+docker-compose rm
 
-These submodules are not required for running the backend serivce and are used for the UI and Billing additions on top of flexiManage.
-To experience the complete flexiWAN system, open a free account on our [hosted system](https://flexiwan.com/pricing).
+docker-compose up --build
 
-## Install and use flexiManage locally
 
-### Prerequisites
-FlexiManage requires the following to run:
-* Node.js v10+
-* npm v6+
-* MongoDB 4.0.9, running as a replica-set with 3 nodes on ports 27017, 27018, 27019
-* Redis 5.0.5, running on port 6379
-* A mailer application or trapper of your choice, running on port 1025 (Such as [python mailtrap](https://pypi.org/project/mailtrap/))
 
-### Installing
-##### Getting the source code:
-```
-mkdir flexiManage
-cd flexiManage
-git clone https://gitlab.com/flexiwangroup/fleximanage.git .
-```
+to make a presentation about vpp code take a look into the release.md file in the vpp repository.
 
-##### Installing dependencies:
-```
-cd backend
-npm install
-```
+compare vpp and flexiwan vpp code side-by-side ::: use the https://docs.flexiwan.com/overview/feature-desc.html page to identify which features are from the org. vpp and which are provided by new "plugins' or commands...
 
-### Running
-```
-npm start
-```
 
-### Creating a user
-To create your first user, use the procedure below:
-1) Register a new user:
-```
-curl -X POST -k "https://local.flexiwan.com:3443/api/users/register" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"accountName\":\"account\",\"userFirstName\":\"user\",\"userLastName\":\"lastname\",\"email\":\"user@example.com\",\"password\":\"xxxxxxxx\",\"userJobTitle\":\"eng\",\"userPhoneNumber\":\"\",\"country\":\"US\",\"companySize\":\"0-10\",\"serviceType\":\"Provider\",\"numberSites\":\"10\",\"companyType\":\"\",\"companyDesc\":\"\",\"captcha\":\"\"}"
-```
-2) You should get an email to user@example.com with a verification link. In the verification link, copy the id and t (token) parameters and execute the verification API:
-```
-curl -X POST -k "https://local.flexiwan.com:3443/api/users/verify-account" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"id\":\"<id parameter in the verification link>\",\"token\":\"<token parameter in the verification link>\"}"
-```
-3) Execute a login API:
-```
-curl -X POST -sD - -k "https://local.flexiwan.com:3443/api/users/login" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"username\":\"user@example.com\",\"password\":\"xxxxxxxx\",\"captcha\":\"\"}"
-```
-Check the response header and use the Refresh-JWT as bearer token for any REST API.
-```
-Refresh-JWT: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZTh...TlNo
-```
-Check the documentation REST API section for more details.  You can create an access-key for your account API key.
 
-### Documentation
-For full documentation of flexiManage, please refer to [flexiManage documentation](https://docs.flexiwan.com/management/management-login.html).
 
-## Versioning
 
-FlexiManage uses [SemVer](https://semver.org/) scheme for versioning.
+DHCP:
+src/vnet/dhcp
+---> how does it 
 
-## License
 
-This project is licensed under the GNU AGPLv3 License - see the [LICENSE.md](https://gitlab.com/flexiwangroup/fleximanage/blob/master/LICENSE) file for details
 
-## Other Open Source Used
 
-This project uses other Open Source components listed [here](https://gitlab.com/flexiwangroup/fleximanage/blob/master/OPENSOURCE.md).
+
+# first create m1, m2, m3 in the /data/db path of your system
+# then issue the following commands (of course in different terminals)
+sudo mongod --port 27017 --dbpath /data/db/m1 --replSet rs
+sudo mongod --port 27018 --dbpath /data/db/m2 --replSet rs
+sudo mongod --port 27019 --dbpath /data/db/m3 --replSet rs
+
+#login to server1:
+mongo --port 27017
+rs.initiate()
+# then go to primary (do this by hitting enter) and do:
+rs.add("localhost:27018")
+# then do this (this one is arbiter node):
+rs.add("localhost:27019", true)
+
+c
+
+
+# if it shows you port 3000 already in use:
+npx kill-port 3000
+
+
+
+
+packet-generator new { name x limit 1000 size 128-128 interface memif1/1 node memif1/1 data { IP6: da01::1 -> da01::2 incrementing 100 } }
+
+
+packet-generator new { name x limit 1000 size 128-128 interface memif1/1 node memif1/1 data { ICMP: 1.0.0.2 -> 2.0.0.2 } }
+
+
+
+packet-generator new { name x limit 1 size 64-64 data { ICMP: da01::1 -> da01::2 ICMP echo_request}}
+
+
+
+
+{ name x limit 1
+  node ip4-input
+  size 64-64
+  no-recycle
+  data {
+    ICMP: 1.0.0.2 -> 2.0.0.2
+    ICMP echo_request
+    incrementing 100
+  }
+}
+
+
+
+
+
+
+packet-generator new { name x limit 1000 node ip4-input size 64-64 data { ICMP: 1.0.0.2 -> 2.0.0.2 ICMP echo_request incrementing 100 } }
+
+
+packet-generator new { name x3 limit 1000 node ip4-input size 64-64 data { IP: da01::1 -> da01::2 ICMP echo_request incrementing 100 } }
+packet-generator new { name x limit 1000 node ip4-input size 64-64 data { IP4: 1.0.0.2 -> 2.0.0.2 } }
+
+
+
+
+
+packet-generator new { name s0 limit 10000 size 128-128 interface local0 node ethernet-input data { IP4: 1.2.3 -> 4.5.6 UDP: 11.22.33.44 -> 11.22.34.44 UDP: 1234 -> 2345 incrementing 114 } }
+
+
+
+
+
+
+packet-generator new { name s1 limit 10000 size 128-128 interface memif1/1 node ethernet-input data { IP6: da01::1 -> da01::1 UDP: 11.22.33.44 -> 11.22.34.44 UDP: 1234 -> 2345 incrementing 114 } }
+
+
+
+
+
+
+
+--------------------------------------------------
+install & run: redis-server, npm install packages at the manager directory,
+
+
+
+mongodb://localhost:27017,localhost:27018,localhost:27019?replicaSet=rs
+mongodb://ubuntu:27017,ubuntu:27018,ubuntu:27019/flexiwan?replicaSet=rs
+mongodb://ubuntu:27017,ubuntu:27018,ubuntu:27019/flexiwanAnalytics?replicaSet=rs
+
+
+
+
+
+
+
+
+
+
+
+
+
+=-------------------------------------------------------------------------------------
+
+
+
+curl -X POST -k "https://0.0.0.0:3443/api/users/register" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"accountName\":\"account\",\"userFirstName\":\"user\",\"userLastName\":\"eshghie\",\"email\":\"eshghi.it@gmail.com\",\"password\":\"110903332311\",\"userJobTitle\":\"eng\",\"userPhoneNumber\":\"\",\"country\":\"US\",\"companySize\":\"0-10\",\"serviceType\":\"Provider\",\"numberSites\":\"10\",\"companyType\":\"\",\"companyDesc\":\"\",\"captcha\":\"\"}"
+
+
+
+curl -X POST -k "https://0.0.0.0:3443/api/users/verify-account" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"id\":\"5f51d32f1e8503126130f287\",\"token\":\"G9VsPkgFZkmh67vqFaZP7fRooEa5tR\"}"
+
+
+curl -X POST -sD - -k "https://0.0.0.0:3443/api/users/login" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"username\":\"eshghi.it@gmail.com\",\"password\":\"110903332311\",\"captcha\":\"\"}"
+
+
+curl -X GET -sD - -k "https://0.0.0.0:3443/api/tokens" -H "accept: application/json" -H "Content-Type: application/json" 
+
+
+http://0.0.0.0:3000/api/users/register
+
+
+
+
+curl -X POST -k "https://0.0.0.0:3443/api/tokens" -H "accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjNiNzgyNDIzNWMyMDY2ZTdkODljMGIiLCJ1c2VybmFtZSI6ImVzaGdoaS5pdEBnbWFpbC5jb20iLCJvcmciOm51bGwsIm9yZ05hbWUiOm51bGwsImFjY291bnQiOiI1ZjNiNzgyNDIzNWMyMDY2ZTdkODljMGEiLCJhY2NvdW50TmFtZSI6ImFjY291bnQiLCJwZXJtcyI6eyJqb2JzIjoxNSwiYmlsbGluZyI6MywiYWNjb3VudHMiOjcsIm9yZ2FuaXphdGlvbnMiOjE1LCJkZXZpY2VzIjoxNSwidG9rZW5zIjoxNSwiYXBwaWRlbnRpZmljYXRpb25zIjoxNSwibWVtYmVycyI6MTUsInR1bm5lbHMiOjE1LCJhY2Nlc3N0b2tlbnMiOjE1LCJub3RpZmljYXRpb25zIjoxNSwicGF0aGxhYmVscyI6MTUsIm1scG9saWNpZXMiOjE1fSwiaWF0IjoxNTk3NzM2ODQwLCJleHAiOjE1OTgzNDE2NDB9.E3FX0Gc4ovjTWL4LM3Pvv1ZFyoXDSoWriXVgnslIVuA" -d "{\"name\":\"mayraa\"}"
+
+
+
+
+curl -X POST -k "https://0.0.0.0:3443/api/devices" -H "accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjRmODk2MDdkNDY1YTBmZTczN2RkNmUiLCJc2VybmFtZSI6ImVzaGdoaS5pdEBnbWFpbC5jb20iLCJvcmciOm51bGwsIm9yZ05hbWUiOm51bGwsImFjY291bnQiOiI1ZjRmODk2MDdkNDY1YTBmZTczN2RkNmQiLCJhY2NvdW50TmFtZSI6ImFjY291bnQiLCJwZXJtcyI6eyJqb2JzIjoxNSwiYmlsbGluZyI6MywiYWNjb3VudHMiOjcsIm9yZ2FuaXphdGlvbnMiOjE1LCJkZXZpY2VzIjoxNSwidG9rZW5zIjoxNSwiYXBwaWRlbnRpZmljYXRpb25zIjoxNSwibWVtYmVycyI6MTUsInR1bm5lbHMiOjE1LCJhY2Nlc3N0b2tlbnMiOjE1LCJub3RpZmljYXRpb25zIjoxNSwicGF0aGxhYmVscyI6MTUsIm1scG9saWNpZXMiOjE1fSwiaWF0IjoxNTk5MDQ4MjI0LCJleHAiOjE1OTk2NTMwMjR9.QtMejmnDFy_Ck8Re0np6iuKKC0K-55HCA62no5ikdyg" -d "{\"name\":\"mayraa\"}"
+
+
+
+
+
+
+curl -X GET -k "https://0.0.0.0:3443/api/organizations/" -H "accept: application/json" -H "Content-Type: application/json" -d "{\"offset\":\"0\",\"limit\":\"1\"}" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjRmODk2MDdkNDY1YTBmZTczN2RkNmUiLCJ1c2VybmFtZSI6ImVzaGdoaS5pdEBnbWFpbC5jb20iLCJvcmciOm51bGwsIm9yZ05hbWUiOm51bGwsImFjY291bnQiOiI1ZjRmODk2MDdkNDY1YTBmZTczN2RkNmQiLCJhY2NvdW50TmFtZSI6ImFjY291bnQiLCJwZXJtcyI6eyJqb2JzIjoxNSwiYmlsbGluZyI6MywiYWNjb3VudHMiOjcsIm9yZ2FuaXphdGlvbnMiOjE1LCJkZXZpY2VzIjoxNSwidG9rZW5zIjoxNSwiYXBwaWRlbnRpZmljYXRpb25zIjoxNSwibWVtYmVycyI6MTUsInR1bm5lbHMiOjE1LCJhY2Nlc3N0b2tlbnMiOjE1LCJub3RpZmljYXRpb25zIjoxNSwicGF0aGxhYmVscyI6MTUsIm1scG9saWNpZXMiOjE1fSwiaWF0IjoxNTk5MDQ4MjI0LCJleHAiOjE1OTk2NTMwMjR9.QtMejmnDFy_Ck8Re0np6iuKKC0K-55HCA62no5ikdyg"
+
+
+
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjRmODk2MDdkNDY1YTBmZTczN2RkNmUiLCJ1c2VybmFtZSI6ImVzaGdoaS5pdEBnbWFpbC5jb20iLCJvcmciOm51bGwsIm9yZ05hbWUiOm51bGwsImFjY291bnQiOiI1ZjRmODk2MDdkNDY1YTBmZTczN2RkNmQiLCJhY2NvdW50TmFtZSI6ImFjY291bnQiLCJwZXJtcyI6eyJqb2JzIjoxNSwiYmlsbGluZyI6MywiYWNjb3VudHMiOjcsIm9yZ2FuaXphdGlvbnMiOjE1LCJkZXZpY2VzIjoxNSwidG9rZW5zIjoxNSwiYXBwaWRlbnRpZmljYXRpb25zIjoxNSwibWVtYmVycyI6MTUsInR1bm5lbHMiOjE1LCJhY2Nlc3N0b2tlbnMiOjE1LCJub3RpZmljYXRpb25zIjoxNSwicGF0aGxhYmVscyI6MTUsIm1scG9saWNpZXMiOjE1fSwiaWF0IjoxNTk5MDQ4MjI0LCJleHAiOjE1OTk2NTMwMjR9.QtMejmnDFy_Ck8Re0np6iuKKC0K-55HCA62no5ikdyg"
+
+
+
+token for device (token1):
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmciOiI1ZjRmOTM3NzdkNDY1YTBmZTczN2RkOGMiLCJhY2NvdW50IjoiNWY0Zjg5NjA3ZDQ2NWEwZmU3MzdkZDZkIiwiaWF0IjoxNTk5MDUxMTQwfQ.OMwfP6xzxe3fysxgk8IkgBLpsVbhGCKY3oJKfdAPKhw
+
+
+
+
+http://0.0.0.0:3000/verify-account?id=5f4f89607d465a0fe737dd6e&t=r5SYMlpZXV7KZKkZ6VOOcVnGedCFtE
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjRmODk2MDdkNDY1YTBmZTczN2RkNmUiLCJc2VybmFtZSI6ImVzaGdoaS5pdEBnbWFpbC5jb20iLCJvcmciOm51bGwsIm9yZ05hbWUiOm51bGwsImFjY291bnQiOiI1ZjRmODk2MDdkNDY1YTBmZTczN2RkNmQiLCJhY2NvdW50TmFtZSI6ImFjY291bnQiLCJwZXJtcyI6eyJqb2JzIjoxNSwiYmlsbGluZyI6MywiYWNjb3VudHMiOjcsIm9yZ2FuaXphdGlvbnMiOjE1LCJkZXZpY2VzIjoxNSwidG9rZW5zIjoxNSwiYXBwaWRlbnRpZmljYXRpb25zIjoxNSwibWVtYmVycyI6MTUsInR1bm5lbHMiOjE1LCJhY2Nlc3N0b2tlbnMiOjE1LCJub3RpZmljYXRpb25zIjoxNSwicGF0aGxhYmVscyI6MTUsIm1scG9saWNpZXMiOjE1fSwiaWF0IjoxNTk5MDQ4MjI0LCJleHAiOjE1OTk2NTMwMjR9.QtMejmnDFy_Ck8Re0np6iuKKC0K-55HCA62no5ikdyg
+
+
