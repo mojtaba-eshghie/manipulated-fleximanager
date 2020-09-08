@@ -15,15 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-const Joi = require('@hapi/joi');
-const Devices = require('./Devices');
-const modifyDeviceDispatcher = require('../deviceLogic/modifyDevice');
-const createError = require('http-errors');
-const { devices } = require('../models/devices');
-const logger = require('../logging/logging')({ module: module.filename, type: 'websocket' });
-const notificationsMgr = require('../notifications/notifications')();
-const { verifyAgentVersion, isSemVer, isVppVersion } = require('../versioning');
-const flexibilling = require('../flexibilling');
+const Joi = require("@hapi/joi");
+const Devices = require("./Devices");
+const modifyDeviceDispatcher = require("../deviceLogic/modifyDevice");
+const createError = require("http-errors");
+const { devices } = require("../models/devices");
+const logger = require("../logging/logging")({
+  module: module.filename,
+  type: "websocket",
+});
+const notificationsMgr = require("../notifications/notifications")();
+const { verifyAgentVersion, isSemVer, isVppVersion } = require("../versioning");
+const flexibilling = require("../flexibilling");
 /**
  * Verifies a device subscription.
  * @param  {string} device device machine id
@@ -39,16 +42,16 @@ const verifySubscription = async (device) => {
   if (result) {
     return { subscriptionValid: result, subscriptionError: null };
   } else {
-    logger.warn('Can not validate subscription', { params: { result } });
+    logger.warn("Can not validate subscription", { params: { result } });
     return {
       subscriptionValid: false,
-      subscriptionError: new Error('Subscription validation failed')
+      subscriptionError: new Error("Subscription validation failed"),
     };
   }
 };
 
 class Connections {
-  constructor () {
+  constructor() {
     this.createConnection = this.createConnection.bind(this);
     this.closeConnection = this.closeConnection.bind(this);
     this.verifyDevice = this.verifyDevice.bind(this);
@@ -80,14 +83,14 @@ class Connections {
    * a ping request for each of them.
    * @return {void}
    */
-  pingCheck () {
-    this.getAllDevices().forEach(deviceID => {
+  pingCheck() {
+    this.getAllDevices().forEach((deviceID) => {
       const { socket } = this.devices.getDeviceInfo(deviceID);
       // Don't try to ping a closing, or already closed socket
       if ([socket.CLOSING, socket.CLOSED].includes(socket.readyState)) return;
       if (socket.isAlive <= 0) {
-        logger.warn('Terminating device due to ping failure', {
-          params: { deviceId: deviceID }
+        logger.warn("Terminating device due to ping failure", {
+          params: { deviceId: deviceID },
         });
         return socket.terminate();
       }
@@ -105,7 +108,7 @@ class Connections {
    * @param  {Callback} callback the callback to be registered
    * @return {void}
    */
-  registerConnectCallback (name, callback) {
+  registerConnectCallback(name, callback) {
     this.connectCallbacks[name] = callback;
   }
 
@@ -114,7 +117,7 @@ class Connections {
    * @param  {string} name the name of the module that registers the callback
    * @return {void}
    */
-  unregisterConnectCallback (name) {
+  unregisterConnectCallback(name) {
     delete this.connectCallbacks[name];
   }
 
@@ -125,7 +128,7 @@ class Connections {
    * @param  {Callback} callback the callback to be registered
    * @return {void}
    */
-  registerCloseCallback (name, callback) {
+  registerCloseCallback(name, callback) {
     this.closeCallbacks[name] = callback;
   }
 
@@ -134,7 +137,7 @@ class Connections {
    * @param  {string} name the name of the module that registers the callback
    * @return {void}
    */
-  unregisterCloseCallback (name) {
+  unregisterCloseCallback(name) {
     delete this.closeCallbacks[name];
   }
 
@@ -144,8 +147,8 @@ class Connections {
    * @param  {string} device the machine id of the device
    * @return {void}
    */
-  callRegisteredCallbacks (cbObj, device) {
-    Object.keys(cbObj).forEach(name => {
+  callRegisteredCallbacks(cbObj, device) {
+    Object.keys(cbObj).forEach((name) => {
       cbObj[name](device);
     });
   }
@@ -157,7 +160,7 @@ class Connections {
    * @param  {Array}   queryParams the array of query parameters of some url
    * @return {boolean} true if the url params are valid, false otherwise
    */
-  checkUrlQueryParams (queryParams) {
+  checkUrlQueryParams(queryParams) {
     // Search for duplicate parameters in the query. If
     // getAll() returns an array with multiple elements,
     // it means the parameter appeared more than once in
@@ -176,16 +179,16 @@ class Connections {
    * @param  {Callback} done a callback used to signal the results to the websocket
    * @return {void}
    */
-  async verifyDevice (info, done) {
+  async verifyDevice(info, done) {
     const connectionURL = new URL(`${info.req.headers.origin}${info.req.url}`);
     const ip =
-      info.req.headers['x-forwarded-for'] || info.req.connection.remoteAddress;
-    logger.info('Device connection opened', {
+      info.req.headers["x-forwarded-for"] || info.req.connection.remoteAddress;
+    logger.info("Device connection opened", {
       params: {
         ip: ip,
-        deviceId: connectionURL ? connectionURL.pathname : '',
-        headers: info.req.headers
-      }
+        deviceId: connectionURL ? connectionURL.pathname : "",
+        headers: info.req.headers,
+      },
     });
 
     if (
@@ -194,30 +197,30 @@ class Connections {
       !connectionURL.pathname.substr(1) ||
       !connectionURL.searchParams ||
       !this.checkUrlQueryParams(connectionURL.searchParams) ||
-      !connectionURL.searchParams.get('token')
+      !connectionURL.searchParams.get("token")
     ) {
-      logger.warn('Device verification failed', {
+      logger.warn("Device verification failed", {
         params: {
           origin: info.origin,
-          deviceId: connectionURL ? connectionURL.pathname : ''
-        }
+          deviceId: connectionURL ? connectionURL.pathname : "",
+        },
       });
       return done(false, 400);
     }
 
     // Verify agent version compatibility
-    if (!info.req.headers['user-agent']) {
-      logger.warn('Received connection request without user-agent field', {
-        params: { deviceId: connectionURL.pathname }
+    if (!info.req.headers["user-agent"]) {
+      logger.warn("Received connection request without user-agent field", {
+        params: { deviceId: connectionURL.pathname },
       });
       return done(false, 400);
     }
 
-    const agentVersion = info.req.headers['user-agent'].split('/')[1];
+    const agentVersion = info.req.headers["user-agent"].split("/")[1];
     const { valid, err } = verifyAgentVersion(agentVersion);
     if (!valid) {
-      logger.warn('Agent version verification failed', {
-        params: { deviceId: connectionURL.pathname, err: err }
+      logger.warn("Agent version verification failed", {
+        params: { deviceId: connectionURL.pathname, err: err },
       });
       return done(false, 400);
     }
@@ -228,8 +231,8 @@ class Connections {
       device
     );
     if (!subscriptionValid) {
-      logger.warn('Subscription verification failed', {
-        params: { deviceId: connectionURL.pathname, err: subscriptionError }
+      logger.warn("Subscription verification failed", {
+        params: { deviceId: connectionURL.pathname, err: subscriptionError },
       });
       return done(false, 402);
     }
@@ -237,10 +240,10 @@ class Connections {
     devices
       .find({
         machineId: device,
-        deviceToken: connectionURL.searchParams.get('token')
+        deviceToken: connectionURL.searchParams.get("token"),
       })
       .then(
-        resp => {
+        (resp) => {
           if (resp.length === 1) {
             // exactly one token found
             // Check if device approved
@@ -253,39 +256,39 @@ class Connections {
               // device changes the IP address of the interface connected to the MGMT).
               const devInfo = this.devices.getDeviceInfo(device);
               if (devInfo && devInfo.ready === true && devInfo.socket) {
-                logger.info('Closing device old connection', {
-                  params: { device: device }
+                logger.info("Closing device old connection", {
+                  params: { device: device },
                 });
-                devInfo.socket.removeAllListeners('close');
+                devInfo.socket.removeAllListeners("close");
                 devInfo.socket.terminate();
               }
               this.devices.setDeviceInfo(device, {
                 org: resp[0].org.toString(),
                 deviceObj: resp[0]._id,
                 machineId: resp[0].machineId,
-                ready: false
+                ready: false,
               });
               return done(true);
             } else {
-              throw createError(403, 'Device found but not approved yet');
+              throw createError(403, "Device found but not approved yet");
             }
           } else if (resp.length === 0) {
-            throw createError(404, 'Device not found');
+            throw createError(404, "Device not found");
           } else {
-            throw createError(500, 'General error');
+            throw createError(500, "General error");
           }
         },
-        err => {
+        (err) => {
           throw err;
         }
       )
-      .catch(err => {
-        logger.warn('Device connection failed', {
+      .catch((err) => {
+        logger.warn("Device connection failed", {
           params: {
             deviceId: connectionURL.pathname,
             err: err.message,
-            status: err.status
-          }
+            status: err.status,
+          },
         });
         return done(false, err.status);
       });
@@ -298,7 +301,9 @@ class Connections {
    * @param  {Object} req    the http GET request sent by the device
    * @return {void}
    */
-  createConnection (socket, req) {
+  createConnection(socket, req) {
+    console.log(socket);
+    console.log(req);
     const connectionURL = new URL(`${req.headers.origin}${req.url}`);
     const device = connectionURL.pathname.substr(1);
     const info = this.devices.getDeviceInfo(device);
@@ -309,12 +314,12 @@ class Connections {
 
     // Initialize to alive connection, with 3 retries
     socket.isAlive = 3;
-    socket.on('pong', function heartbeat () {
+    socket.on("pong", function heartbeat() {
       // Pong received, reset retries
       socket.isAlive = 3;
     });
 
-    socket.on('message', function incoming (message) {
+    socket.on("message", function incoming(message) {
       // Extract the seq from the message
       const jsonmsg = JSON.parse(message);
       const seq = jsonmsg.seq;
@@ -323,14 +328,14 @@ class Connections {
       if (
         seq !== undefined &&
         msgQ[seq] !== undefined &&
-        typeof msgQ[seq].resolver === 'function'
+        typeof msgQ[seq].resolver === "function"
       ) {
         // Only validate device's response if the device processed the message
         // successfully, to prevent validation errors due to the mismatch
         // between the message schema and the error returned by the device
         const { valid, err } = msg.ok
           ? msgQ[seq].validator(msg.message)
-          : { valid: true, err: '' };
+          : { valid: true, err: "" };
 
         if (!valid) {
           const validatorName = msgQ[seq].validator.name;
@@ -350,14 +355,14 @@ class Connections {
       }
     });
 
-    socket.on('error', err => {
-      logger.error('Websocket error', {
+    socket.on("error", (err) => {
+      logger.error("Websocket error", {
         params: {
-          err: err.message
-        }
+          err: err.message,
+        },
       });
     });
-    socket.on('close', () => this.closeConnection(device));
+    socket.on("close", () => this.closeConnection(device));
 
     // Query device for additional required information. Only after getting the device's
     // response and updating the information, the device can be considered ready.
@@ -372,25 +377,34 @@ class Connections {
    * @param  {Object} deviceInfo data received on get-device-info message
    * @return {void}
    */
-  async reconfigCheck (origDevice, deviceInfo) {
+  async reconfigCheck(origDevice, deviceInfo) {
     const machineId = origDevice.machineId;
     const prevDeviceInfo = this.devices.getDeviceInfo(machineId);
-    if (deviceInfo.message.reconfig && prevDeviceInfo.reconfig !== deviceInfo.message.reconfig) {
+    if (
+      deviceInfo.message.reconfig &&
+      prevDeviceInfo.reconfig !== deviceInfo.message.reconfig
+    ) {
       // Check if dhcp client is defined on any of interfaces
-      if (origDevice.interfaces && deviceInfo.message.network.interfaces &&
+      if (
+        origDevice.interfaces &&
+        deviceInfo.message.network.interfaces &&
         deviceInfo.message.network.interfaces.length > 0 &&
-        origDevice.interfaces.filter(i => i.dhcp === 'yes').length > 0) {
+        origDevice.interfaces.filter((i) => i.dhcp === "yes").length > 0
+      ) {
         // Currently we allow only one change at a time to the device,
         // to prevent inconsistencies between the device and the MGMT database.
         // Therefore, we block the request if there's a pending change in the queue.
         // The reconfig hash is not updated so it will try to process again in 10 sec
         if (origDevice.pendingDevModification) {
-          throw new Error('Failed to apply new config, only one device change is allowed');
+          throw new Error(
+            "Failed to apply new config, only one device change is allowed"
+          );
         }
-        const interfaces = origDevice.interfaces.map(i => {
-          if (i.dhcp === 'yes') {
-            const updatedConfig = deviceInfo.message.network.interfaces
-              .find(u => u.pciaddr === i.pciaddr);
+        const interfaces = origDevice.interfaces.map((i) => {
+          if (i.dhcp === "yes") {
+            const updatedConfig = deviceInfo.message.network.interfaces.find(
+              (u) => u.pciaddr === i.pciaddr
+            );
             // ignore if IPv4 or gateway is not assigned by DHCP server
             if (updatedConfig && updatedConfig.IPv4 && updatedConfig.gateway) {
               return {
@@ -399,17 +413,20 @@ class Connections {
                 IPv4Mask: updatedConfig.IPv4Mask,
                 IPv6: updatedConfig.IPv6,
                 IPv6Mask: updatedConfig.IPv6Mask,
-                gateway: updatedConfig.gateway
+                gateway: updatedConfig.gateway,
               };
             } else {
               // Missing some DHCP parameters
-              logger.warn('Missing some DHCP parameters, the config will not be applied', {
-                params: {
-                  reconfig: deviceInfo.message.reconfig,
-                  machineId: machineId,
-                  updatedConfig: JSON.stringify(updatedConfig)
+              logger.warn(
+                "Missing some DHCP parameters, the config will not be applied",
+                {
+                  params: {
+                    reconfig: deviceInfo.message.reconfig,
+                    machineId: machineId,
+                    updatedConfig: JSON.stringify(updatedConfig),
+                  },
                 }
-              });
+              );
             }
           }
           return i;
@@ -421,18 +438,22 @@ class Connections {
           { new: true, runValidators: true }
         );
         // Update the reconfig hash before applying to prevent infinite loop
-        this.devices.updateDeviceInfo(machineId, 'reconfig', deviceInfo.message.reconfig);
+        this.devices.updateDeviceInfo(
+          machineId,
+          "reconfig",
+          deviceInfo.message.reconfig
+        );
 
         // Apply the new config and rebuild tunnels if need
-        logger.info('Applying new configuraton from the device', {
+        logger.info("Applying new configuraton from the device", {
           params: {
             reconfig: deviceInfo.message.reconfig,
-            machineId
-          }
+            machineId,
+          },
         });
         await modifyDeviceDispatcher.apply(
           [origDevice],
-          { username: 'system' },
+          { username: "system" },
           { newDevice: updDevice, org: origDevice.org.toString() }
         );
       }
@@ -447,9 +468,9 @@ class Connections {
    * @param  {string} machineId the device machine id
    * @return {void}
    */
-  async sendDeviceInfoMsg (machineId) {
-    const validateDevInfoMessage = msg => {
-      const devInfoMsgObj = Joi.extend(joi => ({
+  async sendDeviceInfoMsg(machineId) {
+    const validateDevInfoMessage = (msg) => {
+      const devInfoMsgObj = Joi.extend((joi) => ({
         base: joi.object().keys({
           device: joi
             .string()
@@ -467,26 +488,26 @@ class Connections {
               .required(),
             frr: Joi.object()
               .keys({ version: Joi.string().required() })
-              .required()
+              .required(),
           }),
           network: joi.object().optional(),
-          reconfig: joi.string().allow('').optional()
+          reconfig: joi.string().allow("").optional(),
         }),
-        name: 'versions',
+        name: "versions",
         language: {
-          err: 'invalid {{component}} version ({{version}})'
+          err: "invalid {{component}} version ({{version}})",
         },
         rules: [
           {
-            name: 'format',
-            validate (params, value, state, options) {
+            name: "format",
+            validate(params, value, state, options) {
               for (const [component, info] of Object.entries(
                 value.components
               )) {
                 const ver = info.version;
                 if (!(isSemVer(ver) || isVppVersion(ver))) {
                   return this.createError(
-                    'versions.err',
+                    "versions.err",
                     { component: component, version: ver },
                     state,
                     options
@@ -494,28 +515,28 @@ class Connections {
                 }
               }
               return true;
-            }
-          }
-        ]
+            },
+          },
+        ],
       }));
       const devInfoSchema = devInfoMsgObj.versions().format();
       const result = Joi.validate(msg, devInfoSchema);
       if (result.error) {
         return {
           valid: false,
-          err: `${result.error.name}: ${result.error.details[0].message}`
+          err: `${result.error.name}: ${result.error.details[0].message}`,
         };
       }
 
-      return { valid: true, err: '' };
+      return { valid: true, err: "" };
     };
 
     try {
-      logger.info('Device info message sent', { params: { machineId } });
+      logger.info("Device info message sent", { params: { machineId } });
       const deviceInfo = await this.deviceSendMessage(
         null,
         machineId,
-        { entity: 'agent', message: 'get-device-info' },
+        { entity: "agent", message: "get-device-info" },
         validateDevInfoMessage
       );
 
@@ -539,15 +560,15 @@ class Connections {
       // Check if config was modified on the device
       this.reconfigCheck(origDevice, deviceInfo);
 
-      logger.info('Device info message response received', {
-        params: { machineId, message: deviceInfo }
+      logger.info("Device info message response received", {
+        params: { machineId, message: deviceInfo },
       });
 
-      this.devices.updateDeviceInfo(machineId, 'ready', true);
+      this.devices.updateDeviceInfo(machineId, "ready", true);
       this.callRegisteredCallbacks(this.connectCallbacks, machineId);
     } catch (err) {
-      logger.error('Failed to receive info from device', {
-        params: { machineId, err: err.message }
+      logger.error("Failed to receive info from device", {
+        params: { machineId, err: err.message },
       });
       this.deviceDisconnect(machineId);
     }
@@ -558,7 +579,7 @@ class Connections {
    * @param  {string} device device machine id
    * @return {boolean}       true if the device is connected, false otherwise
    */
-  isConnected (device) {
+  isConnected(device) {
     const deviceInfo = this.devices.getDeviceInfo(device);
     if (deviceInfo && deviceInfo.ready) return true;
     return false;
@@ -569,7 +590,7 @@ class Connections {
    * @param  {string} device device machine id
    * @return {void}
    */
-  closeConnection (device) {
+  closeConnection(device) {
     // Device has no information, probably not connected, just return
     const deviceInfo = this.devices.getDeviceInfo(device);
     if (!deviceInfo) return;
@@ -577,16 +598,16 @@ class Connections {
     notificationsMgr.sendNotifications([
       {
         org: org,
-        title: 'Device connection change',
+        title: "Device connection change",
         time: new Date(),
         device: deviceObj,
         machineId: machineId,
-        details: 'Device disconnected from management'
-      }
+        details: "Device disconnected from management",
+      },
     ]);
     this.devices.removeDeviceInfo(device);
     this.callRegisteredCallbacks(this.closeCallbacks, device);
-    logger.info('Device connection closed', { params: { deviceId: device } });
+    logger.info("Device connection closed", { params: { deviceId: device } });
   }
 
   /**
@@ -594,7 +615,7 @@ class Connections {
    * @param  {string} device device machine id
    * @return {void}
    */
-  deviceDisconnect (device) {
+  deviceDisconnect(device) {
     this.devices.disconnectDevice(device);
   }
 
@@ -602,7 +623,7 @@ class Connections {
    * Returns an array of all device IDs, for all organizations
    * @return {Array} an array of all device IDs across all organizations.
    */
-  getAllDevices () {
+  getAllDevices() {
     return this.devices.getAllDevices();
   }
 
@@ -611,7 +632,7 @@ class Connections {
    * @param  {string} deviceID device machine id
    * @return {Object}          contains socket, org, deviceObj
    */
-  getDeviceInfo (deviceID) {
+  getDeviceInfo(deviceID) {
     return this.devices.getDeviceInfo(deviceID);
   }
 
@@ -626,12 +647,12 @@ class Connections {
    * @param  {Callback} responseValidator a validator for validating the device response
    * @return {Promise}                    A promise the message has been sent
    */
-  deviceSendMessage (
+  deviceSendMessage(
     org,
     device,
     msg,
     responseValidator = () => {
-      return { valid: true, err: '' };
+      return { valid: true, err: "" };
     }
   ) {
     var info = this.devices.getDeviceInfo(device);
@@ -642,7 +663,7 @@ class Connections {
         // Increment seq and update queue with resolve function for this promise,
         // set timeout to 60s to clear when no response received
         var tohandle = setTimeout(() => {
-          reject(new Error('Error: Send Timeout'));
+          reject(new Error("Error: Send Timeout"));
           // delete queue for this seq
           delete msgQ[seq];
         }, 120000);
@@ -650,10 +671,10 @@ class Connections {
           resolver: resolve,
           rejecter: reject,
           tohandle: tohandle,
-          validator: responseValidator
+          validator: responseValidator,
         };
         info.socket.send(JSON.stringify({ seq: seq, msg: msg }));
-      } else reject(new Error('Send General Error'));
+      } else reject(new Error("Send General Error"));
     });
     return p;
   }
