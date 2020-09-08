@@ -44,17 +44,31 @@ class DevicesService {
    * no response value expected for this operation
    **/
   static async devicesApplyPOST ({ org, deviceCommand }, { user }, response) {
+
     try {
       // Find all devices of the organization
+      
+
       const orgList = await getAccessTokenOrgList(user, org, true);
+      
       const opDevices = await devices.find({ org: { $in: orgList } })
         .populate('interfaces.pathlabels', '_id name description color type');
+      
+
+
       // Apply the device command
+      console.log(`\n\n  ========= Mojtaba: deviceCommand.method: ${deviceCommand.method} ========\n`)
+      
       const { ids, status, message } = await dispatcher.apply(opDevices, deviceCommand.method,
         user, { org: orgList[0], ...deviceCommand });
-      response.setHeader('Location', DevicesService.jobsListUrl(ids, orgList[0]));
+      
+      
+        response.setHeader('Location', DevicesService.jobsListUrl(ids, orgList[0]));
       return Service.successResponse({ ids, status, message }, 202);
     } catch (e) {
+      
+      console.log(`\n\n  ========= Mojtaba error at devicesApplyPOST with error: ${e.message} ===\n`);
+
       return Service.rejectResponse(
         e.message || 'Internal Server Error',
         e.status || 500

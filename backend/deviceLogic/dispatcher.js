@@ -116,12 +116,18 @@ Object.entries(methods).forEach(([method, functions]) => {
  * @return {void}
  */
 const apply = async (devices, method, user, data = null) => {
+  console.log(`\nMojtaba: method: ${method}, user: ${user}\n`);
+  
+
   logger.info('Apply method called', {
     params: { method: method || null, user: user, data: data }
   });
   const methodFunc = methods.hasOwnProperty(method)
     ? methods[method].apply : null;
-  if (!methodFunc) {
+  
+  
+  
+    if (!methodFunc) {
     throw new Error('Apply method not found');
   }
   const job = await methodFunc(devices, user, data);

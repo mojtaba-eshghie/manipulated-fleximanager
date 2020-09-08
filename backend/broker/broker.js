@@ -35,6 +35,7 @@ const omit = require('lodash/omit');
  */
 exports.deviceConnectionOpened = async (deviceId) => {
   logger.info('Broker: device connection opened', { params: { deviceID: deviceId } });
+  console.log("\n\n ********************************************* \n *********************************************\n ********************************************* \n\n")
   try {
     await deviceQueues.startQueue(deviceId, deviceProcessor);
   } catch (err) {

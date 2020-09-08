@@ -50,12 +50,15 @@ const validateIPv4Mask = mask => {
 const validateDevice = (device, checkLanOverlaps = false, organizationLanSubnets = []) => {
   // Get all assigned interface. There should be at least
   // two such interfaces - one LAN and the other WAN
+  
+
   const interfaces = device.interfaces;
   const assignedIfs = interfaces.filter(ifc => { return ifc.isAssigned; });
   const [wanIfcs, lanIfcs] = [
     assignedIfs.filter(ifc => { return ifc.type === 'WAN'; }),
     assignedIfs.filter(ifc => { return ifc.type === 'LAN'; })
   ];
+  
 
   if (assignedIfs.length < 2 || (wanIfcs.length === 0 || lanIfcs.length === 0)) {
     return {
